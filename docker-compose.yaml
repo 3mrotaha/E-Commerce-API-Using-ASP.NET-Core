@@ -1,0 +1,82 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfiles/api/Dockerfile
+    env_file: ./api.env
+    ports:
+      - "${API_PORT}:8080"
+    environment:
+      ConnectionStrings__DefaultConnectionString: "Server=sql,1433;Database=ECommerceDb;User Id=sa;Password=${SQL_PASSWORD};TrustServerCertificate=True;"
+      Serilog__WriteTo__0__Args__connectionString: "Server=sql,1433;Database=ECommerceDb;User Id=sa;Password=${SQL_PASSWORD};TrustServerCertificate=True;"
+      ConnectionStrings__Redis: "redis:6379,password=${REDIS_PASSWORD}"
+
+  
+  redis:
+    image: redis:7
+    container_name: redis-local
+    ports:
+      - '${REDIS_PORT}:6379'
+    volumes:
+      - redis-data:/data
+    command: >
+      redis-server 
+      --requirepass ${REDIS_PASSWORD}
+      --appendonly yes
+
+    restart: unless-stopped
+  
+  
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-local
+    ports:
+      - "${SQL_PORT}:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+    volumes:
+      - sql-data:/var/opt/mssql
+    restart: unless-stopped
+
+
+  # utility containers
+  redis-cli:
+    image: redis:7
+    container_name: redis-cli
+    depends_on:
+      - redis
+    entrypoint: ["redis-cli"]
+    profiles:
+      - tools
+  
+  sql-tools:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: sql-tools
+    depends_on:
+      - sql
+    entrypoint: ["/opt/mssql-tools/bin/sqlcmd"]
+    profiles:
+      - tools
+  
+  
+  ef-core:
+    build:
+      context: .
+      dockerfile: Dockerfiles/ef-core/Dockerfile
+    env_file: 
+      - ./api.env
+    depends_on:
+      - sql
+    volumes:
+      - ./src/eCommerce.Persistence/Migrations:/src/src/eCommerce.Persistence/Migrations
+    environment:
+      ConnectionStrings__DefaultConnectionString: "Server=sql,1433;Database=ECommerceDb;User Id=sa;Password=${SQL_PASSWORD};TrustServerCertificate=True;"
+
+    profiles:
+      - tools
+
+
+volumes:
+  redis-data:
+  sql-data:
