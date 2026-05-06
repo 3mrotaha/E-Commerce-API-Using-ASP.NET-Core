@@ -72,7 +72,7 @@ public class ProductService : IProductService
 
         // cache invalidation
         await _cache.RemoveAsync($"product:{id}");
-        
+
         _logger.LogInformation("Deleted product {ProductId}", id);
         return Result<bool>.Success(true);
     }
@@ -83,7 +83,7 @@ public class ProductService : IProductService
 
         var cachedProductsJson = await _cache.GetStringAsync("products:all");
 
-        if(cachedProductsJson == null)
+        if (cachedProductsJson == null)
         {
             var products = await _unitOfWork.Products.GetAllAsync();
             cachedProductsJson = JsonSerializer.Serialize(_mapper.Map<List<ProductResponseDto>>(products));
@@ -106,54 +106,74 @@ public class ProductService : IProductService
             pageNumber,
             pageSize);
 
+        // stopwatch for performance monitoring
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+
         List<Product>? products;
         var minPriceValue = Math.Max(minPrice ?? 0m, 0m);
         var maxPriceValue = maxPrice ?? MaxUnitPriceFilter;
         maxPriceValue = Math.Min(maxPriceValue, MaxUnitPriceFilter);
 
         // form cache key
-        string cacheKey=$"products:all:{search??"na"}-{category??"na"}-{minPriceValue}-{maxPriceValue}-{pageNumber}-{pageSize}";
-        cacheKey = cacheKey.Replace(".","-"); // replace the dot in decimal values to avoid issues with cache key parsing
-        
+        string cacheKey = $"products:all:{search ?? "na"}-{category ?? "na"}-{minPriceValue}-{maxPriceValue}-{pageNumber}-{pageSize}";
+        cacheKey = cacheKey.Replace(".", "-"); // replace the dot in decimal values to avoid issues with cache key parsing
+
         // get from cache
         var cachedProductsJson = await _cache.GetStringAsync(cacheKey);
 
         // cache miss
-        if(cachedProductsJson == null)
-        {            
+        if (cachedProductsJson == null)
+        {
             if (search == null)
             {
                 if (category == null)
                 {
-                    products = (await _unitOfWork.Products.FindAsync(p => p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue)).ToList();
+                    products = (await _unitOfWork.Products.FindAsync(p => p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue, pageNumber, pageSize)).ToList();
                 }
                 else
                 {
-                    products = (await _unitOfWork.Products.FindAsync(p => p.Category != null && p.Category.Name == category && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue)).ToList();
+                    // get category id by name
+                    var categoryEntity = (await _unitOfWork.Categories.FindAsync(c => c.Name == category)).FirstOrDefault();
+                    if (categoryEntity == null)
+                    {
+                        _logger.LogError("Category {Category} was not found", category);
+                        return Result<IEnumerable<ProductResponseDto>>.NotFound($"Category with name '{category}' was not found.");
+                    }
+
+                    products = (await _unitOfWork.Products.FindAsync(p => p.CategoryId == categoryEntity.Id && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue, pageNumber, pageSize)).ToList();
                 }
             }
             else
             {
                 if (category == null)
                 {
-                    products = (await _unitOfWork.Products.FindAsync(p => p.Name.Contains(search) && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue)).ToList();
+                    products = (await _unitOfWork.Products.FindAsync(p => p.Name.StartsWith(search) && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue, pageNumber, pageSize)).ToList();
                 }
                 else
                 {
-                    products = (await _unitOfWork.Products.FindAsync(p => p.Name.Contains(search) && p.Category != null && p.Category.Name == category && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue)).ToList();
+                    // get category id by name
+                    var categoryEntity = (await _unitOfWork.Categories.FindAsync(c => c.Name == category)).FirstOrDefault();
+                    if (categoryEntity == null)
+                    {
+                        _logger.LogError("Category {Category} was not found", category);
+                        return Result<IEnumerable<ProductResponseDto>>.NotFound($"Category with name '{category}' was not found.");
+                    }
+
+                    products = (await _unitOfWork.Products.FindAsync(p => p.Name.StartsWith(search) && p.CategoryId == categoryEntity.Id && p.UnitPrice >= minPriceValue && p.UnitPrice <= maxPriceValue, pageNumber, pageSize)).ToList();
                 }
             }
 
-            var paginatedProduct = products.Skip((pageNumber - 1) * pageSize)
-                                        .Take(pageSize);
+            _logger.LogInformation("Retrieved {ProductCount} products for page {PageNumber}", products.Count(), pageNumber);
 
-            _logger.LogInformation("Retrieved {ProductCount} products for page {PageNumber}", paginatedProduct.Count(), pageNumber);
-            
-            var responseResult = _mapper.Map<List<ProductResponseDto>>(paginatedProduct);
+            var responseResult = _mapper.Map<List<ProductResponseDto>>(products);
 
             // update cache
             cachedProductsJson = JsonSerializer.Serialize(responseResult);
             await _cache.SetStringAsync(cacheKey, cachedProductsJson);
+
+            // stop stopwatch and log elapsed time
+            stopwatch.Stop();
+            _logger.LogInformation("GetAllProductsAsync executed in {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
             
             return Result<IEnumerable<ProductResponseDto>>.Success(responseResult);
         }
@@ -161,6 +181,10 @@ public class ProductService : IProductService
         // cache hit        
         var cachedProducts = JsonSerializer.Deserialize<List<ProductResponseDto>>(cachedProductsJson);
         _logger.LogInformation("Retrieved {ProductCount} products from cache for page {PageNumber}", cachedProducts?.Count ?? 0, pageNumber);
+
+        // stop stopwatch and log elapsed time
+        stopwatch.Stop();
+        _logger.LogInformation("GetAllProductsAsync executed in {ElapsedMilliseconds} ms", stopwatch.ElapsedMilliseconds);
 
         return Result<IEnumerable<ProductResponseDto>>.Success(cachedProducts ?? []);
     }
@@ -171,12 +195,12 @@ public class ProductService : IProductService
 
         string key = $"product:{id}";
         var cachedProductJson = await _cache.GetStringAsync(key);
-        
+
         // cache miss
-        if(cachedProductJson == null)
+        if (cachedProductJson == null)
         {
             var product = (await _unitOfWork.Products.FindAsync(p => p.Id == id)).FirstOrDefault();
-            
+
             if (product == null)
             {
                 _logger.LogError("Product {ProductId} was not found", id);
@@ -241,7 +265,7 @@ public class ProductService : IProductService
         }
 
         var productWithCategory = (await _unitOfWork.Products.FindAsync(p => p.Id == updatedProduct.Id)).FirstOrDefault();
-        
+
         // cache invalidation
         await _cache.RemoveAsync($"product:{id}");
 

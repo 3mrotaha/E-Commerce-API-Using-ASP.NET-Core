@@ -2,7 +2,7 @@
 namespace eCommerce.Domain.Enums;
 
 public enum OrderState {
-    PLACED,
+    PENDING,
     PROCESSED,
     CANCELED,
     SHIPPED

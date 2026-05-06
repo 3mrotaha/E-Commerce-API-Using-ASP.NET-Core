@@ -11,7 +11,7 @@ public class ProductProfile : Profile
     public ProductProfile()
     {
         CreateMap<Product, ProductResponseDto>()
-            .ForMember(dest => dest.CategoryName,
+            .ForCtorParam(nameof(ProductResponseDto.CategoryName),
                        opt => opt.MapFrom(src => src.Category != null ? src.Category.Name : string.Empty));   
 
         CreateMap<CreateProductDto, Product>();

@@ -89,7 +89,7 @@ public class OrderService : IOrderService
             Id = Guid.NewGuid(),
             UserId = userId,
             PaymentId = Guid.Empty,
-            OrderState = OrderState.PLACED,
+            OrderState = OrderState.PENDING,
             HasDiscount = orderCreateDto.HasDiscount,
             DiscountValue = orderCreateDto.HasDiscount ? discountValue : null,
             CreatedAt = DateTime.UtcNow
@@ -138,8 +138,7 @@ public class OrderService : IOrderService
             OrderId = createdOrder.Id,
             PaymentMethodId = paymentMethod.Id,
             Amount = finalAmount,
-            CreatedAt = DateTime.UtcNow,
-            PaymentMethod = paymentMethod
+            CreatedAt = DateTime.UtcNow
         };
 
         var createdPaymentRecord = await _unitOfWork.PaymentRecords.AddAsync(paymentRecord);

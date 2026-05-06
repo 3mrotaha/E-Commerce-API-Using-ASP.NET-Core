@@ -10,11 +10,11 @@ public class CartProfile : Profile
     public CartProfile()
     {
         CreateMap<Cart, CartResponseDto>()
-            .ForMember(dest => dest.Items,
+            .ForCtorParam(nameof(CartResponseDto.Items),
                      opt => opt.MapFrom(src => src.CartItems != null ? src.CartItems : new List<CartItem>()));
 
         CreateMap<CartItem, CartItemResponseDto>()
-            .ForMember(dest => dest.ProductName,
+            .ForCtorParam(nameof(CartItemResponseDto.ProductName),
              opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty));
 
         CreateMap<AddCartItemDto, CartItem>();

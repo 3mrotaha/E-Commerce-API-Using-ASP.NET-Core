@@ -53,6 +53,16 @@ namespace eCommerce.Api.Controllers
             return ToFailureActionResult(result);
         }
 
+        protected IActionResult ToCreatedAtActionResult<T>(Result<T> result, string actionName, string controllerName, object? routeValues)
+        {
+            if (result.IsSuccess)
+            {
+                return CreatedAtAction(actionName, controllerName, routeValues, result.Value);
+            }
+
+            return ToFailureActionResult(result);
+        }
+
         protected IActionResult ToMessageActionResult(Result<bool> result, object successBody)
         {
             if (result.IsSuccess)

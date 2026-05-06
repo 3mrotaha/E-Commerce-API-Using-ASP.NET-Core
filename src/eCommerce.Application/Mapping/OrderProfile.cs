@@ -10,14 +10,14 @@ public class OrderProfile : Profile
     public OrderProfile()
     {
         CreateMap<Order, OrderResponseDto>()
-            .ForMember(dest => dest.Items,
-                    opt => opt.MapFrom(src => src.OrderItems != null ? src.OrderItems : new List<OrderItem>()));
+            .ForCtorParam(nameof(OrderResponseDto.Items),
+                     opt => opt.MapFrom(src => src.OrderItems != null ? src.OrderItems : new List<OrderItem>()));
 
         CreateMap<CreateOrderDto, Order>();
         CreateMap<UpdateOrderStateDto, Order>();
 
         CreateMap<OrderItem, OrderItemResponseDto>()
-            .ForMember(dest => dest.ProductName,
+            .ForCtorParam(nameof(OrderItemResponseDto.ProductName),
              opt => opt.MapFrom(src => src.Product != null ? src.Product.Name : string.Empty));
 
         CreateMap<CreateOrderItemDto, OrderItem>();

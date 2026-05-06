@@ -52,7 +52,7 @@ namespace eCommerce.Api.Controllers.V1
 
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN,SUPER_ADMIN", AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = "ADMIN,SUPER_ADMIN,USER", AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> AddProduct([FromBody] CreateProductDto product)
         {
             var result = await _productService.CreateProductAsync(product);

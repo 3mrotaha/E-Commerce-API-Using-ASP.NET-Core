@@ -9,7 +9,7 @@ public class ProductEntityConfiguration(string schema, string tableName) : IEnti
     public void Configure(EntityTypeBuilder<Product> builder)
     {
         builder.ToTable(tableName, schema)            
-            .HasQueryFilter(p => !p.IsDeleted);
+            .HasQueryFilter(p => !p.IsDeleted);            
 
 
         builder.HasKey(x => x.Id);
@@ -21,10 +21,10 @@ public class ProductEntityConfiguration(string schema, string tableName) : IEnti
 
         builder.Property(p => p.Name)
             .IsRequired()
-            .HasMaxLength(200);
+            .HasMaxLength(500);
 
         builder.Property(p => p.Description)
-            .HasMaxLength(1000)
+            .HasMaxLength(10000)
             .IsRequired(false);
         
         builder.Property(p => p.UnitPrice)
@@ -42,9 +42,22 @@ public class ProductEntityConfiguration(string schema, string tableName) : IEnti
             .HasDefaultValueSql("GETUTCDATE()")
             .ValueGeneratedOnAddOrUpdate();
         
-        builder.HasIndex(p => new { p.Name, p.CategoryId, p.UnitPrice }); // composite index on Name, CategoryId and UnitPrice for faster search and filtering by name, category and price
-        builder.HasIndex(p => p.Name); // index on Name for faster search by name
-        builder.HasIndex(p => p.CategoryId); // index on CategoryId for faster filtering by category
-        builder.HasIndex(p => p.UnitPrice); // index on UnitPrice for faster price range queries    
+        builder.HasIndex(p => new { p.Name, p.CategoryId, p.UnitPrice, p.Id })
+                .HasDatabaseName("IX_Products_Name_CategoryId_UnitPrice_Id"); // composite index on Name, CategoryId and UnitPrice for faster search and filtering by name, category and price
+
+        builder.HasIndex(p => new {p.Name, p.UnitPrice, p.Id})
+                .HasDatabaseName("IX_Products_Name_UnitPrice_Id"); // index on Name and UnitPrice for faster search by name and price range
+
+        builder.HasIndex(p => new {p.CategoryId, p.UnitPrice, p.Id})
+                .HasDatabaseName("IX_Products_CategoryId_UnitPrice_Id"); // index on CategoryId and UnitPrice for faster filtering by category and price range
+
+        builder.HasIndex(p => new {p.Name, p.Id })
+                .HasDatabaseName("IX_Products_Name_Id"); // index on Name for faster search by name
+
+        builder.HasIndex(p => new {p.CategoryId, p.Id})
+                .HasDatabaseName("IX_Products_CategoryId_Id"); // index on CategoryId for faster filtering by category
+
+        builder.HasIndex(p => new {p.UnitPrice, p.Id})
+                .HasDatabaseName("IX_Products_UnitPrice_Id"); // index on UnitPrice for faster price range queries    
     }
 }

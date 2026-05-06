@@ -62,6 +62,30 @@ public class ProductRepository : IProductRepository
                                                   .Include(p => p.Category)
                                                   .Where(predicate)
                                                   .ToListAsync();
+
+            _logger.LogInformation("{Repository}-{Method} - Successfully found products with predicate {Predicate}", nameof(ProductRepository), nameof(FindAsync), predicate);
+            return products;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{Repository}-{Method} - Error finding products with predicate {Predicate}", nameof(ProductRepository), nameof(FindAsync), predicate);
+            _logger.LogCritical(ex, "{Repository} - Critical repository failure", nameof(ProductRepository));
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<Product>> FindAsync(Expression<Func<Product, bool>> predicate, int pageNumber, int pageSize)
+    {
+        try
+        {
+            _logger.LogDebug("{Repository} - Executing repository operation", nameof(ProductRepository));
+            var products = await _context.Set<Product>().AsNoTracking()
+                                                  .Where(predicate)
+                                                  .OrderBy(p => p.Id)
+                                                  .Skip((pageNumber - 1) * pageSize)
+                                                  .Take(pageSize)
+                                                  .ToListAsync();
+
             _logger.LogInformation("{Repository}-{Method} - Successfully found products with predicate {Predicate}", nameof(ProductRepository), nameof(FindAsync), predicate);
             return products;
         }
