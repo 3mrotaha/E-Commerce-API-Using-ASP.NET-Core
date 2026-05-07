@@ -17,7 +17,7 @@ namespace eCommerce.Api.Controllers.V1
         }
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN,SUPER_ADMIN,USER", AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = "ADMIN,SUPER_ADMIN", AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> AddCategory([FromBody] CreateProductCategoryDto createProductCategoryDto)
         {
             var category = await _productCategoryService.CreateCategoryAsync(createProductCategoryDto);

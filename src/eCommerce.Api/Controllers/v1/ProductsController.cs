@@ -17,7 +17,7 @@ namespace eCommerce.Api.Controllers.V1
             _productCategoryService = productCategoryService;
         }
 
-        [HttpGet("{pageNumber:int}/{pageSize:int:max(100)}")]
+        [HttpGet("{pageNumber:int}/{pageSize:int:min(1)}")]
         public async Task<IActionResult> GetProducts([FromRoute] int pageNumber,
                                                     [FromRoute] int pageSize,
                                                     [FromQuery] string? search,
@@ -52,7 +52,7 @@ namespace eCommerce.Api.Controllers.V1
 
 
         [HttpPost]
-        [Authorize(Roles = "ADMIN,SUPER_ADMIN,USER", AuthenticationSchemes = "Bearer")]
+        [Authorize(Roles = "ADMIN,SUPER_ADMIN", AuthenticationSchemes = "Bearer")]
         public async Task<IActionResult> AddProduct([FromBody] CreateProductDto product)
         {
             var result = await _productService.CreateProductAsync(product);
