@@ -50,7 +50,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Uploading Artifacts
-      uses: actions/upload-artifacts@v4
+      uses: actions/upload-artifact@v4
       with:
         name: build-artifacts
         path: publish
