@@ -6,8 +6,14 @@ name: Deployment Workflow
 on:
   push:
     branches: [ "main" ]
+
   pull_request:
     branches: [ "main" ]
+    types:
+      - opened
+      - closed
+      - edited      
+
 
 jobs:
   build:
@@ -27,6 +33,7 @@ jobs:
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

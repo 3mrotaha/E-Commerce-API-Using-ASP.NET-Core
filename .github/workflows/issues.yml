@@ -1,0 +1,23 @@
+name: Issues Workflow
+
+on:
+  issues:
+    types: opened
+
+jobs:
+
+  output: 
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Output Event Details
+        run: |
+          echo "a new issue is open"
+          echo "Issue Title: ${{ github.event.issue.title }}"
+          echo "Issue Body: ${{ github.event.issue.body }}"
+          echo "Issue Number ${{ github.event.issue.number }}"
+          echo "Issue Author ${{ github.event.issue.user.login }}"
+          echo "Issue Labels $${{ toJson(github.event.issue.labels) }}"
+  
+
+  
