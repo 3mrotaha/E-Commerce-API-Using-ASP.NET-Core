@@ -21,7 +21,7 @@ The project includes users, admins, products, categories, reviews, carts, orders
 - Logging requests and application events with Serilog, enrichers, and action filters
 
 ## Main Features
-
+ 
 ### Authentication and Accounts
 
 The API supports normal registration/login, JWT tokens, refresh tokens, Google login using the Google OAuth provider, and role-based access.
