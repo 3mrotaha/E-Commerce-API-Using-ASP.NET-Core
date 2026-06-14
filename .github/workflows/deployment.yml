@@ -52,7 +52,7 @@ jobs:
       id: publish
       run: |
         dotnet publish ./src/eCommerce.Api -c Release -o ./publish
-        echo "random-num=10 >> $GITHUB_OUTPUT"
+        echo "random-num=10" >> "$GITHUB_OUTPUT"
     - name: Uploading Artifacts
       uses: actions/upload-artifact@v4
       with:
