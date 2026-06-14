@@ -38,7 +38,7 @@ jobs:
     needs: build-test
     runs-on: ubuntu-latest
     outputs: 
-      random-number: "{{ steps.publish.outputs.random-num }}"
+      random-number: ${{ steps.publish.outputs.random-num }}
     steps:
     - name: Get Code
       uses: actions/checkout@v4
@@ -71,6 +71,6 @@ jobs:
           path: ./publish
 
       - name: Reading Random Number from build job
-        run: echo "{{ needs.build-publish.outputs.random-number }}"
+        run: echo "${{ needs.build-publish.outputs.random-number }}"
       - name: Deploy
         run: echo "Deploying project ..."
