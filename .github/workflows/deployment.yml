@@ -37,7 +37,8 @@ jobs:
   build-publish:
     needs: build-test
     runs-on: ubuntu-latest
-
+    outputs: 
+      random-number: "{{ steps.publish.outputs.random-num }}"
     steps:
     - name: Get Code
       uses: actions/checkout@v4
@@ -48,7 +49,10 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build for publish
-      run: dotnet publish ./src/eCommerce.Api -c Release -o ./publish
+      id: publish
+      run: |
+        dotnet publish ./src/eCommerce.Api -c Release -o ./publish
+        echo "random-num=10 >> $GITHUB_OUTPUT"
     - name: Uploading Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -66,5 +70,7 @@ jobs:
           name: publish-artifacts
           path: ./publish
 
+      - name: Reading Random Number from build job
+        run: echo "{{ needs.build-publish.outputs.random-number }}"
       - name: Deploy
         run: echo "Deploying project ..."
