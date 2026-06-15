@@ -12,8 +12,50 @@ on:
     types:
       - opened
       - closed
-      - edited      
+      - edited
 
+env:
+  ASPNETCORE_ENVIRONMENT: Development
+  JwtTokenOptions__RefreshTokenExpiryMinutes: 10080
+  JwtTokenOptions__Issuer: eCommerceApi
+  JwtTokenOptions__ExpiryMinutes: 60
+  JwtTokenOptions__Audience: eCommerceClient
+
+  Serilog__Using__0: Serilog.Sinks.MSSqlServer
+  Serilog__Using__1: Serilog.Sinks.Seq
+  Serilog__Using__2: Serilog.Sinks.Debug
+
+  Serilog__Enrich__0: FromLogContext
+  Serilog__Enrich__1: WithThreadId
+  Serilog__Enrich__2: WithMachineName
+
+  Serilog__Properties__Application: ECommerceApi
+
+  Serilog__WriteTo__0__Name: MSSqlServer
+  Serilog__WriteTo__0__Args__tableName: Logs
+  Serilog__WriteTo__0__Args__autoCreateSqlTable: true
+  Serilog__WriteTo__0__Args__batchPostingLimit: 200
+  Serilog__WriteTo__0__Args__period: 00:00:10
+
+  Serilog__WriteTo__1__Name: Seq
+  Serilog__WriteTo__1__Args__serverUrl: http://host.docker.internal:5341
+
+  Serilog__WriteTo__2__Name: Debug
+
+  Serilog__MinimumLevel__Default: Debug
+  Serilog__MinimumLevel__Override__Microsoft.AspNetCore: Debug
+  Serilog__MinimumLevel__Override__Microsoft.EntityFrameworkCore: Debug
+
+  # secrets
+  ASPNETCORE_URLS: ${{ secrets.ASPNETCORE_URLS }}
+  JwtTokenOptions__SecretKey: ${{ secrets.JwtTokenOptions__SecretKey }}
+  Authentication__Google__ClientSecret: ${{ secrets.Authentication__Google__ClientSecret }}
+  Authentication__Google__ClientId: ${{ secrets.Authentication__Google__ClientId }}
+  REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
+  REDIS_PORT: ${{ secrets.REDIS_PORT }}
+  SQL_PORT: ${{ secrets.SQL_PORT }}
+  SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
+  API_PORT: ${{ secrets.API_PORT }}
 
 jobs:
   build-test:
