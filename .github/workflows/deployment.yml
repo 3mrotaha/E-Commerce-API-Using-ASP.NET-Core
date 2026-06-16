@@ -137,7 +137,7 @@ jobs:
 
     steps:
       - name: output deploy result
-        run: echo "${{ needs.deploy.outputs.deploy-result }}
+        run: echo "${{ needs.deploy.outputs.deploy-result }}"
 
   workflow-report:
     needs: deploy
