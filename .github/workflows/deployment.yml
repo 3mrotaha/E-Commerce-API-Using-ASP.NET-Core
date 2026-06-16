@@ -64,7 +64,9 @@ jobs:
       matrix:
         dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
         operating-system: ["ubuntu-latest", "windows-latest"]
-    
+        exclude:
+          - dotnet-version: "8.0.x"
+            operating-system: "windows-latest"    
     runs-on: ${{ matrix.operating-system }}
     environment: staging
     
@@ -86,12 +88,15 @@ jobs:
 
 
   build-publish:
-    needs: build-test
     strategy:
       matrix:
         dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
         operating-system: ["ubuntu-latest", "windows-latest"]
-    
+        
+        exclude:
+          - dotnet-version: "8.0.x"
+            operating-system: "windows-latest"
+      
     runs-on: ${{ matrix.operating-system }}
     environment: production
     outputs: 
@@ -119,18 +124,20 @@ jobs:
         path: ./publish
 
   deploy:
-    needs: build-publish
+    needs: [build-test, build-publish]
+    uses: ./.github/workflows/reusable-deploy.yml
+    with:
+      artifact-name: "./publish"
+
+
+  deploy-result:
+    needs: deploy
     runs-on: ubuntu-latest
     environment: production
-    
+
     steps:
-      - name: Deploying with reusable workflow
-        uses: ./.github/workflows/reusable-deploy.yml
-        with:
-          artifact-name: "./publish"
-      - name: Output Deploy result
-        run: echo "Deployment is ${{ github.outputs.deploy-result }}"
-        
+      - name: output deploy result
+        run: echo "${{ github.deploy.outputs.deploy-result }}
 
   workflow-report:
     needs: deploy
