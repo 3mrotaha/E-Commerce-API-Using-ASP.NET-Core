@@ -1,0 +1,35 @@
+name: Reusable Deploy Workflow
+
+on: 
+  workflow_call:
+    inputs:
+      artifact-name:
+        type: string
+        description: The artifact folder name
+        required: false
+        default: "./publish"
+    outputs:
+      deploy-result:
+        description: the deployment result
+        value: ${{ jobs.deploy.outputs.outcome }}
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    outputs:
+      outcome: ${{ steps.deploy-result-step.outputs.out-result }}
+    steps:
+      - name: Downloading build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: publish-artifacts
+          path: ./publish
+
+      - name: Reading Random Number from build job
+        run: echo "${{ needs.build-publish.outputs.random-number }}"
+      - name: Deploy
+        run: echo "Deploying project ..."
+
+      - name: Result of deployment process
+        id: deploy-result-step
+        run: echo "out-result=successful"

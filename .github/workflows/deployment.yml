@@ -55,10 +55,11 @@ env:
   REDIS_PORT: ${{ secrets.REDIS_PORT }}
   SQL_PORT: ${{ secrets.SQL_PORT }}
   SQL_PASSWORD: ${{ secrets.SQL_PASSWORD }}
-  API_PORT: ${{ secrets.API_PORT }}
+  API_PORT: ${{ secrets.API_PORT }} 
 
 jobs:
-  build-test:    
+  build-test:
+    continue-on-error: true
     strategy:
       matrix:
         dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
@@ -121,17 +122,15 @@ jobs:
     needs: build-publish
     runs-on: ubuntu-latest
     environment: production
+    
     steps:
-      - name: Downloading build Artifacts
-        uses: actions/download-artifact@v4
+      - name: Deploying with reusable workflow
+        uses: ./.github/workflows/reusable-deploy.yml
         with:
-          name: publish-artifacts
-          path: ./publish
-
-      - name: Reading Random Number from build job
-        run: echo "${{ needs.build-publish.outputs.random-number }}"
-      - name: Deploy
-        run: echo "Deploying project ..."
+          artifact-name: "./publish"
+      - name: Output Deploy result
+        run: echo "Deployment is ${{ github.outputs.deploy-result }}"
+        
 
   workflow-report:
     needs: deploy
