@@ -33,4 +33,4 @@ jobs:
 
       - name: Result of deployment process
         id: deploy-result-step
-        run: echo "out-result=successful"
+        run: echo "out-result=successful" >> $GITHUB_OUTPUT
