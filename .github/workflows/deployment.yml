@@ -59,7 +59,12 @@ env:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
+        operating-system: ["ubuntu-latest", "windows-latest"]
+    
+    runs-on: ${{ matrix.operating-system }}
     environment: staging
     
     steps:
@@ -68,7 +73,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 10.0.x
+        dotnet-version: ${{ matrix.dotnet-version }}
         cache: true
         cache-dependency-path: "**/packages.lock.json"
     - name: Restore dependencies
@@ -80,8 +85,12 @@ jobs:
 
 
   build-publish:
-    needs: build-test
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
+        operating-system: ["ubuntu-latest", "windows-latest"]
+    
+    runs-on: ${{ matrix.operating-system }}
     environment: production
     outputs: 
       random-number: ${{ steps.publish.outputs.random-num }}
@@ -122,3 +131,14 @@ jobs:
         run: echo "${{ needs.build-publish.outputs.random-number }}"
       - name: Deploy
         run: echo "Deploying project ..."
+
+  workflow-report:
+    needs: deploy
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output information
+        run: |
+          echo "something went wrong"
+          echo "${{ toJson(github) }}"
+
