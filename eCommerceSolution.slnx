@@ -5,5 +5,6 @@
     <Project Path="src/eCommerce.Domain/eCommerce.Domain.csproj" />
     <Project Path="src/eCommerce.Infrastructure/eCommerce.Infrastructure.csproj" />
     <Project Path="src/eCommerce.Persistence/eCommerce.Persistence.csproj" />
+    <Project Path="src/eCommerce.Test/eCommerce.Test.csproj" />
   </Folder>
 </Solution>
