@@ -68,7 +68,7 @@ jobs:
           - operating-system: "windows-latest"    
     runs-on: ${{ matrix.operating-system }}
     container:
-      image: mcr.microsoft.com/dotnet/aspnet:10.0
+      image: mcr.microsoft.com/dotnet/sdk:10.0
 
     environment: staging
     services:
@@ -123,7 +123,7 @@ jobs:
       
     runs-on: ${{ matrix.operating-system }}
     container:
-      image: mcr.microsoft.com/dotnet/aspnet:10.0
+      image: mcr.microsoft.com/dotnet/sdk:10.0
     services:
       sql:
         image: mcr.microsoft.com/mssql/server:2022-latest
@@ -147,7 +147,7 @@ jobs:
           redis-server 
           --requirepass $"REDIS_PASSWORD"
           --appendonly yes
-          
+
     environment: production
     outputs: 
       random-number: ${{ steps.publish.outputs.random-num }}
