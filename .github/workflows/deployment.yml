@@ -75,22 +75,24 @@ jobs:
       sql:
         image: mcr.microsoft.com/mssql/server:2022-latest
         ports:
-          - "${SQL_PORT}:1433"
+          - 1433:1433
         env:
-          ACCEPT_EULA: "Y"
-          MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: ${{ secrets.SQL_PASSWORD }}
         volumes:
           - sql-data:/var/opt/mssql
 
       redis:
         image: redis:7        
         ports:
-          - '${REDIS_PORT}:6379'
+          - 3000:6379
         volumes:
           - redis-data:/data
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         command: >
           redis-server 
-          --requirepass ${REDIS_PASSWORD}
+          --requirepass $"REDIS_PASSWORD"
           --appendonly yes
 
     steps:
@@ -126,23 +128,26 @@ jobs:
       sql:
         image: mcr.microsoft.com/mssql/server:2022-latest
         ports:
-          - "${SQL_PORT}:1433"
+          - 1433:1433
         env:
-          ACCEPT_EULA: "Y"
-          MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: ${{ secrets.SQL_PASSWORD }}
         volumes:
           - sql-data:/var/opt/mssql
 
       redis:
         image: redis:7        
         ports:
-          - '${REDIS_PORT}:6379'
+          - 3000:6379
         volumes:
           - redis-data:/data
+        env:
+          REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
         command: >
           redis-server 
-          --requirepass ${REDIS_PASSWORD}
+          --requirepass $"REDIS_PASSWORD"
           --appendonly yes
+          
     environment: production
     outputs: 
       random-number: ${{ steps.publish.outputs.random-num }}
