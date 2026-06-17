@@ -68,8 +68,32 @@ jobs:
           - dotnet-version: "8.0.x"
             operating-system: "windows-latest"    
     runs-on: ${{ matrix.operating-system }}
+    container:
+      image: mcr.microsoft.com/dotnet/aspnet:10.0
+
     environment: staging
-    
+    services:
+      sql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+          - "${SQL_PORT}:1433"
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+        volumes:
+          - sql-data:/var/opt/mssql
+
+      redis:
+        image: redis:7        
+        ports:
+          - '${REDIS_PORT}:6379'
+        volumes:
+          - redis-data:/data
+        command: >
+          redis-server 
+          --requirepass ${REDIS_PASSWORD}
+          --appendonly yes
+
     steps:
     - name: Get Code
       uses: actions/checkout@v4
@@ -98,6 +122,29 @@ jobs:
             operating-system: "windows-latest"
       
     runs-on: ${{ matrix.operating-system }}
+    container:
+      image: mcr.microsoft.com/dotnet/aspnet:10.0
+    services:
+      sql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        ports:
+          - "${SQL_PORT}:1433"
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: "${SQL_PASSWORD}"
+        volumes:
+          - sql-data:/var/opt/mssql
+
+      redis:
+        image: redis:7        
+        ports:
+          - '${REDIS_PORT}:6379'
+        volumes:
+          - redis-data:/data
+        command: >
+          redis-server 
+          --requirepass ${REDIS_PASSWORD}
+          --appendonly yes
     environment: production
     outputs: 
       random-number: ${{ steps.publish.outputs.random-num }}
