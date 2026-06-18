@@ -69,7 +69,7 @@ public class MappingProfiles_Test
 
         var dto = _mapper.Map<ProductResponseDto>(product);
 
-        dto.CategoryName.Should().Be("Electronics");
+        dto.CategoryName.Should().Be("Electronicsgg");
     }
 
     [Fact]
