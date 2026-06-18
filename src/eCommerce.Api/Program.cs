@@ -58,3 +58,8 @@ app.UseAuthorizeAdminAccountActivated(); // authorize admin accounts
 app.MapControllers();
 
 app.Run();
+
+// Exposes the top-level-statements entry point as a public type so the integration
+// test project can target it with WebApplicationFactory<Program>. Without this, the
+// generated Program class is internal and not referenceable from the test assembly.
+public partial class Program { }

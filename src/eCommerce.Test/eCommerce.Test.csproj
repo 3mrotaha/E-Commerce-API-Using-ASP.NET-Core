@@ -23,6 +23,11 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <!-- Lets the integration tests use ASP.NET Core types directly (rate limiting, hosting, auth). -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\eCommerce.Api\eCommerce.Api.csproj" />
     <ProjectReference Include="..\eCommerce.Application\eCommerce.Application.csproj" />

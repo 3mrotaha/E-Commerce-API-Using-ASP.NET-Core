@@ -105,6 +105,15 @@ public class CartRepository : ICartRepository
     {
         try
         {
+            // The cart may already be tracked in this same DbContext (e.g. it was just created earlier in
+            // the request). Attaching a second instance with the same key throws an identity conflict, so
+            // detach the tracked copy first and let this instance take over.
+            var tracked = _context.Carts.Local.FirstOrDefault(c => c.Id == entity.Id);
+            if (tracked != null && !ReferenceEquals(tracked, entity))
+            {
+                _context.Entry(tracked).State = EntityState.Detached;
+            }
+
             _context.Carts.Update(entity);
             await _context.SaveChangesAsync();
             _logger.LogInformation("{Repository}-{Method} - Successfully updated cart {Entity}", nameof(CartRepository), nameof(UpdateAsync), entity);
