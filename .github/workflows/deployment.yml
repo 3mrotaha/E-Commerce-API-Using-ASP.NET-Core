@@ -107,7 +107,7 @@ jobs:
     - name: Test
       run: dotnet test ./eCommerceSolution.slnx -c Release --no-build --verbosity normal
     - name: Job report
-      run: echo "cache used? ${{ steps.deps.outputs.cache-used }}"
+      run: echo "cache disabled? ${{ steps.deps.outputs.cache-used }}"
 
   build-publish:
     strategy:
@@ -163,7 +163,7 @@ jobs:
         name: publish-artifacts
         path: ./publish
     - name: Job report
-      run: echo "cache used? ${{ steps.deps.outputs.cache-used }}"
+      run: echo "cache disabled? ${{ steps.deps.outputs.cache-used }}"
       
 
   deploy:
