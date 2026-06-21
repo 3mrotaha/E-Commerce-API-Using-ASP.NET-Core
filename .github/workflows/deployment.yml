@@ -98,6 +98,7 @@ jobs:
     - name: Get Code
       uses: actions/checkout@v4
     - name: Get & Cache Dependencies
+      id: deps
       uses: ./.github/actions/cache-deps
       with:
         cache-disable: 'true'
@@ -105,7 +106,8 @@ jobs:
       run: dotnet build ./eCommerceSolution.slnx -c Release --no-restore
     - name: Test
       run: dotnet test ./eCommerceSolution.slnx -c Release --no-build --verbosity normal
-
+    - name: Job report
+      run: echo "cache used? ${{ steps.deps.outputs.cache-used }}"
 
   build-publish:
     strategy:
@@ -148,6 +150,7 @@ jobs:
     - name: Get Code
       uses: actions/checkout@v4
     - name: Get & Cache Dependencies
+      id: deps
       uses: ./.github/actions/cache-deps
     - name: Build for publish
       id: publish
@@ -159,6 +162,9 @@ jobs:
       with:
         name: publish-artifacts
         path: ./publish
+    - name: Job report
+      run: echo "cache used? ${{ steps.deps.outputs.cache-used }}"
+      
 
   deploy:
     needs: [build-test, build-publish]
