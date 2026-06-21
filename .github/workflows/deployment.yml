@@ -99,6 +99,8 @@ jobs:
       uses: actions/checkout@v4
     - name: Get & Cache Dependencies
       uses: ./.github/actions/cache-deps
+      with:
+        cache-disable: 'true'
     - name: Build
       run: dotnet build ./eCommerceSolution.slnx -c Release --no-restore
     - name: Test
