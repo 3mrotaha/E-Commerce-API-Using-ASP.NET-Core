@@ -97,14 +97,8 @@ jobs:
     steps:
     - name: Get Code
       uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ matrix.dotnet-version }}
-        cache: true
-        cache-dependency-path: "**/packages.lock.json"
-    - name: Restore dependencies
-      run: dotnet restore ./eCommerceSolution.slnx
+    - name: Get & Cache Dependencies
+      uses: ./.github/actions/cache-deps
     - name: Build
       run: dotnet build ./eCommerceSolution.slnx -c Release --no-restore
     - name: Test
@@ -151,14 +145,8 @@ jobs:
     steps:
     - name: Get Code
       uses: actions/checkout@v4
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 10.0.x
-        cache: true
-        cache-dependency-path: "**/packages.lock.json"        
-    - name: Restore dependencies
-      run: dotnet restore
+    - name: Get & Cache Dependencies
+      uses: ./.github/actions/cache-deps
     - name: Build for publish
       id: publish
       run: |
